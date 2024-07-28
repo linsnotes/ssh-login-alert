@@ -2,7 +2,7 @@
 
 # This script sets up msmtp and configures it to send email alerts on SSH login.
 # It performs the following actions:
-# - Installs the msmtp, msmtp-mta, and apparmor-utils packages if they are not already installed.
+# - Installs the msmtp and msmtp-mta packages if they are not already installed.
 # - Creates a log directory at /var/log/msmtp/ with appropriate permissions.
 # - Creates a group 'msmtp' for logging and adds the current user to this group.
 # - Prompts the user for email configuration details and recipient email address.
@@ -11,7 +11,7 @@
 # - Creates a symlink from /usr/bin/msmtp to /usr/sbin/sendmail.
 # - Creates an SSH login alert script at /usr/local/bin/ssh-login-alert.sh.
 # - Configures SSH to trigger the alert script on login by creating a script at /etc/profile.d/ssh-login-alert.sh.
-# - Ensures that AppArmor is set to complain mode for msmtp and makes this change permanent by creating or updating /etc/rc.local.
+# - Reminds the user to choose 'no' if the system prompts to enable AppArmor for msmtp.
 #
 # After running this script, users can:
 # - Receive email alerts whenever someone logs in to the server via SSH.
@@ -34,6 +34,10 @@
 #   sudo userdel msmtp
 #   sudo apt-get autoremove -y
 # Note: Replace <username> with the actual username you want to remove from the msmtp group.
+
+
+
+
 
 # Ensure the script is run with sudo
 [[ "$EUID" -ne 0 ]] && { echo "This script must be run as root. Use sudo."; exit 1; }
@@ -76,8 +80,19 @@ trap 'log "An error occurred. Exiting."; exit 1' ERR
 
 log "Starting msmtp setup script."
 
+# Reminder to user about AppArmor
+while true; do
+    echo "If the system prompts to enable AppArmor for msmtp, please choose 'no'."
+    read -p "Do you understand this instruction? (yes/no): " CONFIRM_APPARMOR
+    case "$CONFIRM_APPARMOR" in
+        yes ) break;;
+        no ) echo "Please ensure you understand this instruction before proceeding.";;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+
 # Confirm before package installation
-echo "The script will install the following packages: msmtp, msmtp-mta, apparmor-utils."
+echo "The script will install the following packages: msmtp, msmtp-mta."
 read -p "Do you want to proceed with the package installation? (y/n): " CONFIRM_INSTALL
 if [[ "$CONFIRM_INSTALL" != "y" ]]; then
     log "Package installation aborted by user. Exiting."
@@ -108,53 +123,7 @@ else
     log "msmtp-mta is already installed."
 fi
 
-# Check if apparmor-utils is installed, if not install it
-if ! dpkg -l | grep -q apparmor-utils; then
-    log "apparmor-utils is not installed. Installing..."
-    apt-get install -y apparmor-utils
-    if [[ $? -ne 0 ]]; then
-        log "Failed to install apparmor-utils. Exiting."
-        exit 1
-    fi
-else
-    log "apparmor-utils is already installed."
-fi
 
-# Confirm before modifying AppArmor
-echo "The script will set AppArmor to complain mode for msmtp, reducing its enforcement effectiveness."
-read -p "Do you want to proceed with setting AppArmor to complain mode? (y/n): " CONFIRM_APPARMOR
-if [[ "$CONFIRM_APPARMOR" != "y" ]]; then
-    log "AppArmor modification aborted by user. Exiting."
-    exit 1
-fi
-
-# Set AppArmor to complain mode for msmtp and make it permanent
-log "Setting AppArmor to complain mode for msmtp."
-aa-complain /etc/apparmor.d/usr.bin.msmtp
-
-# Ensure /etc/rc.local exists and is executable
-if [[ ! -f /etc/rc.local ]]; then
-    log "/etc/rc.local does not exist. Creating it."
-    cat <<EOL > /etc/rc.local
-#!/bin/bash
-# rc.local
-# This script is executed at the end of each multiuser runlevel.
-# Make sure that the script will "exit 0" on success or any other
-# value on error.
-
-# By default this script does nothing.
-
-aa-complain /etc/apparmor.d/usr.bin.msmtp
-
-exit 0
-EOL
-    chmod +x /etc/rc.local
-else
-    if ! grep -q "aa-complain /etc/apparmor.d/usr.bin.msmtp" /etc/rc.local; then
-        log "Adding aa-complain command to /etc/rc.local."
-        sed -i -e '$i \aa-complain /etc/apparmor.d/usr.bin.msmtp\n' /etc/rc.local
-    fi
-fi
 
 # Prompt user for email configuration
 log "Prompting user for email configuration."
@@ -274,4 +243,4 @@ EOL
 # Ensure the script is executable
 chmod +x "$SSHR_CONFIG"
 
-log "Setup complete. Test by logging in via SSH."
+log "msmtp setup script completed successfully."
