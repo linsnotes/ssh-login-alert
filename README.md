@@ -3,6 +3,11 @@
 This script sets up `msmtp` and configures it to send email alerts on SSH login. It performs several actions to ensure the proper installation and configuration of required packages, as well as the creation of necessary scripts and configurations to enable email notifications.
 
 ## Features
+- Sends an email notification upon every SSH login
+- Configurable email recipient
+- Easy setup and installation
+
+## The script will do the following
 
 - Installs `msmtp`, `msmtp-mta`, and `apparmor-utils` packages if not already installed.
 - Creates a log directory at `/var/log/msmtp/` with appropriate permissions.
