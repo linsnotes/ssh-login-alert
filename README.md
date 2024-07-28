@@ -21,20 +21,22 @@ This script sets up `msmtp` and configures it to send email alerts on SSH login.
 
 ## Usage
 
-1. **Clone the Repository:**
+1. **Download the script:**
 
     ```bash
-    git clone https://github.com/yourusername/ssh-login-alert.git
-    cd ssh-login-alert
+    wget https://raw.githubusercontent.com/linsnotes/ssh-login-alert/main/setup-ssh-login-alert.sh
     ```
 
-2. **Run the Script:**
+2. **Make the Script Executable:**
 
+    ```bash
+    sudo chmod +x setup-ssh-login-alert.sh
+    ```
+3. **Run the Script:**
     ```bash
     sudo ./setup-ssh-login-alert.sh
     ```
-
-3. **Follow the Prompts:**
+5. **Follow the Prompts:**
 
     - The script will prompt you for the following:
         - 'from' email address
@@ -42,7 +44,7 @@ This script sets up `msmtp` and configures it to send email alerts on SSH login.
         - Email password (input securely)
         - Recipient email address
 
-4. **Confirm Critical Actions:**
+6. **Confirm Critical Actions:**
 
     - You will be prompted to confirm the installation of packages, modifications to AppArmor, and creation of the symlink.
 
