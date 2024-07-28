@@ -73,7 +73,7 @@ sudo ln -s /etc/apparmor.d/usr.bin.msmtp /etc/apparmor.d/disable/usr.bin.msmtp
 
 # Reload the AppArmor profiles:
 sudo apparmor_parser -R /etc/apparmor.d/usr.bin.msmtp
-
+-----------------------------------------------------
 # To enable the profile again:
 # Remove the symlink from the disable directory:
 sudo rm /etc/apparmor.d/disable/usr.bin.msmtp
