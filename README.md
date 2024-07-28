@@ -53,6 +53,39 @@ This script sets up `msmtp` and configures it to send email alerts on SSH login.
 
     - You will be prompted to confirm the installation of packages, modifications to AppArmor, and creation of the symlink.
 
+
+## Additional AppArmor Instructions
+
+If you encounter a permission error such as:
+
+```
+sendmail: cannot log to /var/log/msmtp/msmtp.log: cannot open: Permission denied
+```
+
+Follow these steps to configure AppArmor for `msmtp`:
+
+```bash
+# Install AppArmor Utilities
+sudo apt-get install apparmor-utils
+
+# Create a symlink in the disable directory:
+sudo ln -s /etc/apparmor.d/usr.bin.msmtp /etc/apparmor.d/disable/usr.bin.msmtp
+
+# Reload the AppArmor profiles:
+sudo apparmor_parser -R /etc/apparmor.d/usr.bin.msmtp
+
+# To enable the profile again:
+# Remove the symlink from the disable directory:
+sudo rm /etc/apparmor.d/disable/usr.bin.msmtp
+
+# Reload the AppArmor profile:
+sudo apparmor_parser -r /etc/apparmor.d/usr.bin.msmtp
+
+# Set the profile to enforce mode:
+sudo aa-enforce /etc/apparmor.d/usr.bin.msmtp
+```
+
+
 ## Removal Instructions
 
 To remove all changes made by this script, run the following commands:
