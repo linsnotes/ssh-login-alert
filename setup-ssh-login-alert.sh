@@ -30,6 +30,7 @@
 #   sudo usermod -g nogroup msmtp
 #   sudo groupdel msmtp
 #   sudo userdel msmtp
+#   sudo sudo apt-get autoremove
 # Note: Replace <username> with the actual username you want to remove from the msmtp group.
 
 # Ensure the script is run with sudo
