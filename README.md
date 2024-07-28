@@ -62,7 +62,7 @@ If you encounter a permission error such as:
 sendmail: cannot log to /var/log/msmtp/msmtp.log: cannot open: Permission denied
 ```
 
-Follow these steps to configure AppArmor for `msmtp`:
+It is likely caused by AppArmor. To resolve this, you can temporarily disable the AppArmor profile for msmtp. Follow these steps to configure AppArmor for `msmtp`:
 
 ```bash
 # Install AppArmor Utilities
