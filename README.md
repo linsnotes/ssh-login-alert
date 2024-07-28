@@ -29,7 +29,7 @@ This script sets up `msmtp` and configures it to send email alerts on SSH login.
 1. **Download the script:**
 
     ```bash
-    wget https://raw.githubusercontent.com/linsnotes/ssh-login-alert/main/setup-ssh-login-alert.sh
+    wget https://github.com/linsnotes/ssh-login-alert/blob/main/setup-ssh-login-alert.sh
     ```
 
 2. **Make the Script Executable:**
