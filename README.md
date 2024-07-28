@@ -64,7 +64,9 @@ sudo rm -r /var/log/msmtp
 sudo rm /etc/msmtprc
 sudo rm /etc/rc.local
 sudo deluser <username> msmtp
+sudo usermod -g nogroup msmtp
 sudo groupdel msmtp
+sudo userdel msmtp
 ```
 
 Replace `<username>` with the actual username you want to remove from the `msmtp` group.
