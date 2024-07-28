@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 # This script sets up msmtp and configures it to send email alerts on SSH login.
 # It performs the following actions:
 # - Installs the msmtp and msmtp-mta packages if they are not already installed.
@@ -35,9 +33,33 @@
 #   sudo apt-get autoremove -y
 # Note: Replace <username> with the actual username you want to remove from the msmtp group.
 
+# If you encounter a permission error such as:
+# - sendmail: cannot log to /var/log/msmtp/msmtp.log: cannot open: Permission denied
+# Follow these steps to configure AppArmor for msmtp:
+# Install AppArmor Utilities
+# - sudo apt-get install apparmor-utils
+
+# Create a symlink in the disable directory:
+# - sudo ln -s /etc/apparmor.d/usr.bin.msmtp /etc/apparmor.d/disable/usr.bin.msmtp
+
+# Reload the AppArmor profiles:
+# - sudo apparmor_parser -R /etc/apparmor.d/usr.bin.msmtp
+
+# To enable the profile again:
+# Remove the symlink from the disable directory:
+# - sudo rm /etc/apparmor.d/disable/usr.bin.msmtp
+
+# Reload the AppArmor profile:
+# - sudo apparmor_parser -r /etc/apparmor.d/usr.bin.msmtp
+
+# Set the profile to enforce mode:
+# - sudo aa-enforce /etc/apparmor.d/usr.bin.msmtp
 
 
 
+
+
+#!/usr/bin/env bash
 
 # Ensure the script is run with sudo
 [[ "$EUID" -ne 0 ]] && { echo "This script must be run as root. Use sudo."; exit 1; }
@@ -122,8 +144,6 @@ if ! dpkg -l | grep -q msmtp-mta; then
 else
     log "msmtp-mta is already installed."
 fi
-
-
 
 # Prompt user for email configuration
 log "Prompting user for email configuration."
