@@ -27,8 +27,9 @@
 #   sudo rm /etc/msmtprc
 #   sudo rm /etc/rc.local
 #   sudo deluser <username> msmtp
+#   sudo usermod -g nogroup msmtp
 #   sudo groupdel msmtp
-#
+#   sudo userdel msmtp
 # Note: Replace <username> with the actual username you want to remove from the msmtp group.
 
 # Ensure the script is run with sudo
