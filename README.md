@@ -72,7 +72,11 @@ Replace `<username>` with the actual username you want to remove from the `msmtp
 ## Security Considerations
 
 - **Password Handling:** The script prompts for the email password and stores it in the `msmtp` configuration file. Ensure the configuration file is securely handled and permissions are correctly set.
-- **AppArmor Mode:** The script sets AppArmor to complain mode for `msmtp`, reducing its enforcement effectiveness. Confirm this action during the script execution.
+- **AppArmor Mode:** The script sets AppArmor to complain mode for `msmtp`, which reduces its enforcement effectiveness. AppArmor is a security module that restricts the actions of programs based on predefined profiles. By default, AppArmor may prevent `msmtp` (the mail sending utility) from writing logs to `/var/log/msmtp/msmtp.log`. This restriction can interfere with the script's ability to log email sending actions. Confirm this action during the script execution.
+
+To ensure `msmtp` can log its activities, the script sets AppArmor to complain mode for `msmtp`. In complain mode, AppArmor allows `msmtp` to perform all actions but logs any actions that would have been blocked if it were in enforcing mode. This mode is less restrictive and ensures `msmtp` can write to the log file without issues.
+
+You will be asked to confirm this action during the script execution.
 - **Symlink Creation:** Overwriting the `sendmail` binary with a symlink may cause unintended side effects. Understand the implications and confirm this action during the script execution.
 
 ## License
