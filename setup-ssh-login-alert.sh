@@ -23,9 +23,11 @@
 # - Run the following commands:
 #   sudo apt-get remove msmtp msmtp-mta apparmor-utils
 #   sudo rm /etc/profile.d/ssh-login-alert.sh
+#   sudo rm /usr/local/bin/ssh-login-alert.sh
 #   sudo rm -r /var/log/msmtp
 #   sudo rm /etc/msmtprc
 #   sudo rm /etc/rc.local
+#   sudo unlink /usr/sbin/sendmail
 #   sudo deluser <username> msmtp
 #   sudo usermod -g nogroup msmtp
 #   sudo groupdel msmtp
