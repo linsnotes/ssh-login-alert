@@ -53,7 +53,7 @@ This script sets up `msmtp` and configures it to send email alerts on SSH login.
 
     - You will be prompted to confirm the installation of packages, modifications to AppArmor.
 
-7. **Uninstall"
+7. **Uninstall**
     ```bash
     wget https://raw.githubusercontent.com/linsnotes/ssh-login-alert/main/uninstall.sh
     ```
