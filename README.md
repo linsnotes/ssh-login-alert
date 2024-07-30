@@ -39,7 +39,7 @@ This script sets up `msmtp` and configures it to send email alerts on SSH login.
     ```
 3. **Run the Script:**
     ```bash
-    sudo ./setup-ssh-login-alert.sh
+    sudo ./ssh-login-alert.sh
     ```
 5. **Follow the Prompts:**
 
