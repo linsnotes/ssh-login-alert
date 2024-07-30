@@ -35,7 +35,7 @@ This script sets up `msmtp` and configures it to send email alerts on SSH login.
 2. **Make the Script Executable:**
 
     ```bash
-    sudo chmod +x setup-ssh-login-alert.sh
+    sudo chmod +x ssh-login-alert.sh
     ```
 3. **Run the Script:**
     ```bash
@@ -51,8 +51,20 @@ This script sets up `msmtp` and configures it to send email alerts on SSH login.
 
 6. **Confirm Critical Actions:**
 
-    - You will be prompted to confirm the installation of packages, modifications to AppArmor, and creation of the symlink.
+    - You will be prompted to confirm the installation of packages, modifications to AppArmor.
 
+7. **Uninstall"
+    ```bash
+    wget https://raw.githubusercontent.com/linsnotes/ssh-login-alert/main/uninstall.sh
+    ```
+
+   ```bash
+    sudo chmod +x uninstall.sh
+    ```
+
+   ```bash
+    sudo ./uninstall.sh
+    ```
 
 ## Additional AppArmor Instructions
 
