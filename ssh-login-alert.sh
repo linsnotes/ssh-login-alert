@@ -119,41 +119,54 @@ else
     log "msmtp-mta is already installed."
 fi
 
+# Function to prompt for email configuration
+prompt_email_configuration() {
+    # Prompt for 'from' and 'user' email address
+    while true; do
+        read -p "Enter the 'from' and 'user' email address: " FROM_EMAIL
+        if [[ "$FROM_EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+            break
+        else
+            echo "Invalid email format. Please enter a valid email address."
+        fi
+    done
 
-# Prompt user for email configuration
-log "Prompting user for email configuration."
+    # Prompt for password twice to ensure correctness
+    while true; do
+        read -s -p "Enter the 'password': " EMAIL_PASSWORD
+        echo
+        read -s -p "Confirm the 'password': " EMAIL_PASSWORD_CONFIRM
+        echo
+        if [ "$EMAIL_PASSWORD" == "$EMAIL_PASSWORD_CONFIRM" ]; then
+            break
+        else
+            echo "Passwords do not match. Please try again."
+        fi
+    done
+}
 
-read -p "Enter the 'from' email address: " FROM_EMAIL
-read -p "Enter the 'user' email address: " USER_EMAIL
-
-# Prompt for password twice to ensure correctness
+# Loop until valid email inputs are provided
 while true; do
-    read -s -p "Enter the 'password': " EMAIL_PASSWORD
-    echo
-    read -s -p "Confirm the 'password': " EMAIL_PASSWORD_CONFIRM
-    echo
-    if [ "$EMAIL_PASSWORD" == "$EMAIL_PASSWORD_CONFIRM" ]; then
-        break
+    prompt_email_configuration
+
+    # Validate email inputs
+    if [[ -z "$FROM_EMAIL" || -z "$EMAIL_PASSWORD" ]]; then
+        log "Email configuration input is invalid. Please try again."
     else
-        echo "Passwords do not match. Please try again."
+        break
     fi
 done
 
-# Validate email inputs
-if [[ -z "$FROM_EMAIL" || -z "$USER_EMAIL" || -z "$EMAIL_PASSWORD" ]]; then
-    log "Email configuration input is invalid. Exiting."
-    exit 1
-fi
-
 # Prompt user for recipient email
 log "Prompting user for recipient email address."
-read -p "Enter the recipient email address: " RECIPIENT_EMAIL
-
-# Validate recipient email
-if [[ -z "$RECIPIENT_EMAIL" ]]; then
-    log "Recipient email input is invalid. Exiting."
-    exit 1
-fi
+while true; do
+    read -p "Enter the recipient email address: " RECIPIENT_EMAIL
+    if [[ "$RECIPIENT_EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+        break
+    else
+        echo "Invalid email format. Please enter a valid email address."
+    fi
+done
 
 # Create the msmtp configuration file
 CONFIG_FILE="/etc/msmtprc"
@@ -173,7 +186,7 @@ account        gmail
 host           smtp.gmail.com
 port           465
 from           $FROM_EMAIL
-user           $USER_EMAIL
+user           $FROM_EMAIL
 password       "$EMAIL_PASSWORD"
 
 # Set a default account
