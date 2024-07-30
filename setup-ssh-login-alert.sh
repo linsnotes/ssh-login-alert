@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # This script sets up msmtp and configures it to send email alerts on SSH login.
 # It performs the following actions:
 # - Installs the msmtp and msmtp-mta packages if they are not already installed.
@@ -15,11 +17,11 @@
 # - Receive email alerts whenever someone logs in to the server via SSH.
 # - Modify the msmtp configuration at /etc/msmtprc if needed.
 # - Check the log file at /var/log/msmtp/msmtp.log for logging information.
-# - Send emails using sendmail, mail, and msmtp commands.
+# - Send emails using sendmail and msmtp commands.
 #
 # To remove all changes made by this script:
 # - Run the following commands:
-#   sudo apt-get remove msmtp msmtp-mta apparmor-utils
+#   sudo apt purge -y msmtp msmtp-mta
 #   sudo rm /etc/profile.d/ssh-login-alert.sh
 #   sudo rm /usr/local/bin/ssh-login-alert.sh
 #   sudo rm -r /var/log/msmtp
@@ -30,36 +32,8 @@
 #   sudo usermod -g nogroup msmtp
 #   sudo groupdel msmtp
 #   sudo userdel msmtp
-#   sudo apt-get autoremove -y
+#   sudo apt autoremove -y
 # Note: Replace <username> with the actual username you want to remove from the msmtp group.
-
-# If you encounter a permission error such as:
-# - sendmail: cannot log to /var/log/msmtp/msmtp.log: cannot open: Permission denied
-# Follow these steps to configure AppArmor for msmtp:
-# Install AppArmor Utilities
-# - sudo apt-get install apparmor-utils
-
-# Create a symlink in the disable directory:
-# - sudo ln -s /etc/apparmor.d/usr.bin.msmtp /etc/apparmor.d/disable/usr.bin.msmtp
-
-# Reload the AppArmor profiles:
-# - sudo apparmor_parser -R /etc/apparmor.d/usr.bin.msmtp
-
-# To enable the profile again:
-# Remove the symlink from the disable directory:
-# - sudo rm /etc/apparmor.d/disable/usr.bin.msmtp
-
-# Reload the AppArmor profile:
-# - sudo apparmor_parser -r /etc/apparmor.d/usr.bin.msmtp
-
-# Set the profile to enforce mode:
-# - sudo aa-enforce /etc/apparmor.d/usr.bin.msmtp
-
-
-
-
-
-#!/usr/bin/env bash
 
 # Ensure the script is run with sudo
 [[ "$EUID" -ne 0 ]] && { echo "This script must be run as root. Use sudo."; exit 1; }
@@ -104,7 +78,7 @@ log "Starting msmtp setup script."
 
 # Reminder to user about AppArmor
 while true; do
-    echo "If the system prompts to enable AppArmor for msmtp, please choose 'no'."
+    echo "If the system prompts you with 'Enable AppArmor support?', select 'No'. Enabling AppArmor support might cause a permission error."
     read -p "Do you understand this instruction? (yes/no): " CONFIRM_APPARMOR
     case "$CONFIRM_APPARMOR" in
         yes ) break;;
@@ -115,8 +89,8 @@ done
 
 # Confirm before package installation
 echo "The script will install the following packages: msmtp, msmtp-mta."
-read -p "Do you want to proceed with the package installation? (y/n): " CONFIRM_INSTALL
-if [[ "$CONFIRM_INSTALL" != "y" ]]; then
+read -p "Do you want to proceed with the package installation? (yes/no): " CONFIRM_INSTALL
+if [[ "$CONFIRM_INSTALL" != "yes" ]]; then
     log "Package installation aborted by user. Exiting."
     exit 1
 fi
@@ -124,7 +98,7 @@ fi
 # Check if msmtp is installed, if not install it
 if ! command -v msmtp >/dev/null 2>&1; then
     log "msmtp is not installed. Installing..."
-    apt-get update && apt-get install -y msmtp
+    apt update && apt install -y msmtp
     if [[ $? -ne 0 ]]; then
         log "Failed to install msmtp. Exiting."
         exit 1
@@ -136,7 +110,7 @@ fi
 # Check if msmtp-mta is installed, if not install it
 if ! dpkg -l | grep -q msmtp-mta; then
     log "msmtp-mta is not installed. Installing..."
-    apt-get install -y msmtp-mta
+    apt install -y msmtp-mta
     if [[ $? -ne 0 ]]; then
         log "Failed to install msmtp-mta. Exiting."
         exit 1
@@ -144,6 +118,7 @@ if ! dpkg -l | grep -q msmtp-mta; then
 else
     log "msmtp-mta is already installed."
 fi
+
 
 # Prompt user for email configuration
 log "Prompting user for email configuration."
@@ -211,21 +186,21 @@ chmod 644 "$CONFIG_FILE"
 chown root:root "$CONFIG_FILE"
 
 # Confirm before creating symlink
-echo "The script will create a symlink from /usr/bin/msmtp to /usr/sbin/sendmail."
-echo "Overwriting the sendmail binary with a symlink may cause unintended side effects."
-read -p "Do you want to proceed with creating the symlink? (y/n): " CONFIRM_SYMLINK
-if [[ "$CONFIRM_SYMLINK" != "y" ]]; then
-    log "Symlink creation aborted by user. Exiting."
-    exit 1
-fi
+#echo "The script will create a symlink from /usr/bin/msmtp to /usr/sbin/sendmail."
+#echo "Overwriting the sendmail binary with a symlink may cause unintended side effects."
+#read -p "Do you want to proceed with creating the symlink? (yes/no): " CONFIRM_SYMLINK
+#if [[ "$CONFIRM_SYMLINK" != "yes" ]]; then
+#    log "Symlink creation aborted by user. Exiting."
+#    exit 1
+#fi
 
 # Symlink msmtp to sendmail
-if [[ ! -L /usr/sbin/sendmail ]]; then
-    log "Creating symlink from /usr/bin/msmtp to /usr/sbin/sendmail."
-    ln -sf /usr/bin/msmtp /usr/sbin/sendmail
-else
-    log "Symlink /usr/sbin/sendmail already exists."
-fi
+#if [[ ! -L /usr/sbin/sendmail ]]; then
+#    log "Creating symlink from /usr/bin/msmtp to /usr/sbin/sendmail."
+#    ln -sf /usr/bin/msmtp /usr/sbin/sendmail
+#else
+#    log "Symlink /usr/sbin/sendmail already exists."
+#fi
 
 # Create the SSH Login Alert Script
 ALERT_SCRIPT="/usr/local/bin/ssh-login-alert.sh"
@@ -264,3 +239,11 @@ EOL
 chmod +x "$SSHR_CONFIG"
 
 log "msmtp setup script completed successfully."
+echo "If you encounter a permission error such as:"
+echo " sendmail: cannot log to /var/log/msmtp/msmtp.log: cannot open: Permission denied"
+echo "It is likely caused by AppArmor. To resolve this, you can disable the AppArmor profile for msmtp."
+echo "Follow these steps to configure AppArmor for msmtp:"
+echo "# Create a symlink in the disable directory:"
+echo " sudo ln -sf /etc/apparmor.d/usr.bin.msmtp /etc/apparmor.d/disable/usr.bin.msmtp"
+echo "# Reload the AppArmor profile:"
+echo " sudo apparmor_parser -r /etc/apparmor.d/usr.bin.msmtp"
