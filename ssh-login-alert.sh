@@ -177,20 +177,20 @@ cat <<EOL > "$CONFIG_FILE"
 defaults
 auth           on
 tls            on
-tls_starttls   off
+tls_starttls   on
 tls_trust_file /etc/ssl/certs/ca-certificates.crt
 logfile        $LOGFILE
 
 # Example account configuration
-account        gmail
-host           smtp.gmail.com
-port           465
+account        outlook            # google account change to outlook
+host           smtp.office365.com   # google account change to smtp.gmail.com
+port           587
 from           $FROM_EMAIL
 user           $FROM_EMAIL
 password       "$EMAIL_PASSWORD"
 
 # Set a default account
-account default : gmail
+account default : outlook       # google account change to google
 EOL
 log "Configuration file created."
 
