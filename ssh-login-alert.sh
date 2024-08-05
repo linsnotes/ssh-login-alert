@@ -182,15 +182,23 @@ tls_trust_file /etc/ssl/certs/ca-certificates.crt
 logfile        $LOGFILE
 
 # Example account configuration
-account        outlook            # google account change to outlook
-host           smtp.office365.com   # google account change to smtp.gmail.com
+account        outlook
+host           smtp.office365.com
 port           587
 from           $FROM_EMAIL
 user           $FROM_EMAIL
 password       "$EMAIL_PASSWORD"
 
+# uncomment the following to set gmail
+#account        gmail
+#host           smtp.gmail.com
+#port           587
+#from           ""
+#user           ""
+#password       ""
+
 # Set a default account
-account default : outlook       # google account change to google
+account default : outlook
 EOL
 log "Configuration file created."
 
