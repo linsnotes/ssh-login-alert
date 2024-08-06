@@ -1,0 +1,89 @@
+#!/bin/bash
+
+# Check if the script is run with sudo
+if [ "$(id -u)" -ne 0 ]; then
+  echo "This script must be run with sudo or as root. Please run it again with 'sudo'."
+  exit 1
+fi
+
+# Function to prompt for a valid email address
+get_valid_email() {
+  while true; do
+    read -p "Enter the email address to send notifications to: " RECIPIENT
+    if [[ "$RECIPIENT" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+      break
+    else
+      echo "Invalid email address format. Please enter a valid email."
+    fi
+  done
+}
+
+# Prompt user for the recipient's email address and validate
+get_valid_email
+
+# Define variables
+SCRIPT_PATH="/usr/local/bin/startup_notification.sh"
+CRON_JOB="@reboot /usr/local/bin/startup_notification.sh"
+
+# Check if msmtp is installed
+if ! command -v msmtp &> /dev/null; then
+  echo "msmtp is not installed. Please install it before running this script."
+  exit 1
+fi
+
+# Create the notification script
+echo "Creating the notification script at $SCRIPT_PATH..."
+cat > $SCRIPT_PATH << EOF
+#!/bin/bash
+
+# Email settings
+RECIPIENT="$RECIPIENT"
+SUBJECT="System Boot Notification"
+
+# Gather system information
+HOSTNAME=\$(hostname)
+PRIVATE_IP=\$(hostname -I | awk '{print \$1}')
+DATE_TIME=\$(date '+%Y-%m-%d %H:%M:%S')
+
+# Email body
+BODY="Host machine name: \$HOSTNAME\nPrivate IP: \$PRIVATE_IP\nBoot time: \$DATE_TIME"
+
+# Send the email using msmtp
+echo -e "\$BODY" | msmtp -s "\$SUBJECT" \$RECIPIENT
+EOF
+
+# Check if script creation was successful
+if [ ! -f "$SCRIPT_PATH" ]; then
+  echo "Failed to create the notification script at $SCRIPT_PATH."
+  exit 1
+fi
+
+echo "Notification script created at $SCRIPT_PATH."
+
+# Make the script executable
+echo "Setting execute permissions for the script at $SCRIPT_PATH..."
+chmod +x $SCRIPT_PATH
+
+# Verify permissions were set
+if [ ! -x "$SCRIPT_PATH" ]; then
+  echo "Failed to set execute permissions for the script at $SCRIPT_PATH."
+  exit 1
+fi
+echo "Permissions set. The script at $SCRIPT_PATH is now executable."
+
+# Add the script to root's crontab if not already present
+if (crontab -l 2>/dev/null | grep -F "$SCRIPT_PATH"); then
+  echo "Cron job already exists for $SCRIPT_PATH. No changes made to crontab."
+else
+  echo "Adding cron job to run the script at system startup..."
+  (crontab -l 2>/dev/null; echo "$CRON_JOB") | crontab -
+
+  # Check if cron job was successfully added
+  if ! (crontab -l 2>/dev/null | grep -F "$SCRIPT_PATH"); then
+    echo "Failed to add the cron job. Please check your crontab settings."
+    exit 1
+  fi
+  echo "Cron job added. The script will run at system startup."
+fi
+
+echo "Setup complete. The notification script has been installed and configured."
